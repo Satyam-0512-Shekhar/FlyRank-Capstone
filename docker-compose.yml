@@ -1,0 +1,50 @@
+services:
+  # ─── PostgreSQL Database ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: flyrank_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-flyrank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flyrank_secret_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-flyrank_billing}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flyrank} -d ${POSTGRES_DB:-flyrank_billing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ─── FastAPI Backend ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flyrank_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-flyrank}:${POSTGRES_PASSWORD:-flyrank_secret_change_me}@postgres:5432/${POSTGRES_DB:-flyrank_billing}
+      POSTGRES_HOST: postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data:
+    driver: local
