@@ -1,9 +1,9 @@
 """PaymentEvent model — full schema defined in Phase 3."""
 import uuid
 import datetime
-from sqlalchemy import String, Text, UniqueConstraint, func
+from sqlalchemy import String, Text, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB
 from app.core.database import Base
 
 
@@ -13,7 +13,8 @@ class PaymentEvent(Base):
         UniqueConstraint("provider", "provider_event_id", name="uq_payment_provider_event"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
     provider: Mapped[str] = mapped_column(String(50), nullable=False, default="razorpay")
     provider_event_id: Mapped[str] = mapped_column(String(255), nullable=False)
     event_type: Mapped[str] = mapped_column(String(100), nullable=False)

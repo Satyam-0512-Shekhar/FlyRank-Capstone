@@ -1,19 +1,19 @@
 """UsageEvent model — immutable usage ledger."""
 import uuid
 import datetime
-from sqlalchemy import String, BigInteger, Integer, ForeignKey, func, Index, text
+from sqlalchemy import String, BigInteger, Integer, ForeignKey, Uuid, func, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 
 
 class UsageEvent(Base):
     __tablename__ = "usage_events"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
+        Uuid(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True
     )
+
     usage_type: Mapped[str] = mapped_column(String(50), nullable=False, default="generate")
     api_calls: Mapped[int] = mapped_column(BigInteger, nullable=False, default=1)
     total_tokens: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)

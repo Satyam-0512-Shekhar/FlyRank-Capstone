@@ -1,22 +1,22 @@
 """Subscription model — full schema defined in Phase 3."""
 import uuid
 import datetime
-from sqlalchemy import String, ForeignKey, func
+from sqlalchemy import String, ForeignKey, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), unique=True, nullable=False
+        Uuid(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), unique=True, nullable=False
     )
     plan_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("plans.id"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("plans.id"), nullable=False
     )
+
     provider: Mapped[str] = mapped_column(String(50), nullable=False, default="razorpay")
     provider_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     provider_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)

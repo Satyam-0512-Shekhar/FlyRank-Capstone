@@ -1,9 +1,9 @@
 """IdempotencyRecord model — full schema defined in Phase 3."""
 import uuid
 import datetime
-from sqlalchemy import String, Integer, ForeignKey, func, UniqueConstraint
+from sqlalchemy import String, Integer, ForeignKey, Uuid, func, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB
 from app.core.database import Base
 
 
@@ -13,10 +13,11 @@ class IdempotencyRecord(Base):
         UniqueConstraint("tenant_id", "idempotency_key", name="uq_idempotency_tenant_key"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False
     )
+
     idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
     request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     response_status_code: Mapped[int] = mapped_column(Integer, nullable=False)
