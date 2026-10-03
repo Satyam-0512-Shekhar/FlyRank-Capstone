@@ -13,11 +13,11 @@ base_url: "http://localhost:8000"
 
 endpoints:
   health: "GET /health"
-  tenants_create: "POST /api/v1/tenants"
+  tenants: "POST /api/v1/tenants"
   tenant_me: "GET /api/v1/tenants/me"
   generate: "POST /api/v1/generate"
   usage: "GET /api/v1/usage"
   usage_events: "GET /api/v1/usage/events"
-  subscription_create: "POST /api/v1/billing/subscription"
-  subscription_get: "GET /api/v1/billing/subscription"
-  webhook: "POST /api/v1/webhooks/razorpay"
+  subscription: "POST /api/v1/billing/subscription"
+  webhooks: "POST /api/v1/webhooks/razorpay"
+

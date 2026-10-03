@@ -52,8 +52,26 @@ Each entry follows this structure:
 | **Task** | Repository initialisation, Docker configuration, FastAPI skeleton, Alembic setup |
 | **AI Assistance** | Antigravity (Claude Sonnet Thinking) |
 | **What AI Generated** | .gitignore, .env.example, requirements.txt, Dockerfile, docker-compose.yml, app/core/* (config.py, database.py, exceptions.py, security.py), app/main.py, app/api/v1/health.py, alembic.ini, migrations/env.py, model stubs, capstone.yaml |
-| **What Was Correct** | All files verified against DESIGN.md v2.0; exception hierarchy maps to correct HTTP status codes; webhook security uses constant-time comparison; asyncpg engine configured correctly |
-| **What Was Incorrect** | TBD — will be updated after Docker build verification |
-| **What Was Changed** | TBD |
-| **Why Changed** | TBD |
-| **How Tested** | `docker compose up --build` → `GET /health` → 200 OK verified |
+| **What Was Correct** | Project structure; exception hierarchy definitions; webhook security constant-time comparison; asyncpg engine configured correctly |
+| **What Was Incorrect** | `script.py.mako` was 1-line stub; duplicate `httpx` in requirements.txt; missing partial unique constraint & covering index on `UsageEvent`; `get_db()` omitted commit; `health.py` returned 200 when DB down; hardcoded password in alembic.ini; deprecated `@app.on_event`; Settings crashed on extra env vars; README.md missing |
+| **What Was Changed** | Deferred to Phase 3 Fix & Harden |
+| **Why Changed** | Audit identified multiple critical and high severity defects in scaffold |
+| **How Tested** | Static code review and red-team audit. Docker Compose verification was pending daemon availability. |
+
+---
+
+### 2026-10-04 — Phase 3: Fix & Harden
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Phase 3: Fix & Harden |
+| **Task** | Review findings, classify each finding, fix all confirmed bugs, add regression tests, and validate test suite |
+| **AI Assistance** | Antigravity (Gemini Flash + Claude Sonnet Thinking) |
+| **What AI Generated** | Standard Alembic Mako template; UsageEvent table args with partial unique index & covering rollup index; `get_db()` commit-on-success; HTTP 503 health check on DB failure; lifespan context manager; `Retry-After` header injection; `extra="ignore"` and production secret validation in `config.py`; `tests/conftest.py`; `pytest.ini`; `README.md`; 19 unit & regression tests |
+| **What Was Correct** | All 19 tests passed on first run after resolving fixture scope; 97% test coverage achieved across codebase |
+| **What Was Incorrect** | Initial test run had 2 fixture/naming mismatches (async client fixture scope and constraint name `uq_payment_provider_event`), immediately corrected |
+| **What Was Changed** | Replaced `script.py.mako`; removed duplicate `httpx`; added `setuptools<72` for razorpay compatibility; added `__table_args__` to `UsageEvent`; added `session.commit()` to `get_db()`; returned 503 on health check error; added `Retry-After` header; updated `alembic.ini` and `env.py`; aligned `capstone.yaml` |
+| **Why Changed** | Systematic resolution of all Critical/High bugs and security findings from Phase 3 Red-Team Report |
+| **How Tested** | `python -m pytest -v --cov=app tests/` → 19/19 PASSED (0 failures, 97% coverage) |
+

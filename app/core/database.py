@@ -2,10 +2,12 @@
 FlyRank Capstone — Async SQLAlchemy database engine & session factory.
 """
 
+from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
+
 
 # ── Engine ────────────────────────────────────────────────────────────────────
 engine = create_async_engine(
@@ -32,12 +34,17 @@ class Base(DeclarativeBase):
 
 
 # ── FastAPI dependency ────────────────────────────────────────────────────────
-async def get_db() -> AsyncSession:  # type: ignore[return]
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
+            if session.is_active:
+                await session.commit()
         except Exception:
-            await session.rollback()
+            if session.is_active:
+                await session.rollback()
             raise
         finally:
             await session.close()
+
+

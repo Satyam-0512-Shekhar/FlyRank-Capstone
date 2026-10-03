@@ -3,10 +3,26 @@
 
 This document provides verifiable evidence for every major requirement in the FlyRank capstone brief. Evidence is collected progressively as each phase completes.
 
-> [!NOTE]
-> Evidence sections are populated during Phases 12–13. Placeholder sections are stubs that will be filled with actual HTTP request/response transcripts, database query outputs, and test run logs.
+---
+
+## Phase 3: Infrastructure Hardening & Security Verification Evidence
+
+| Area | Test / Assertion | Result | Evidence |
+|---|---|---|---|
+| **Cryptographic Webhook Security** | HMAC-SHA256 constant-time signature verification | ✅ PASS | `tests/unit/test_security.py::test_verify_razorpay_signature_valid` passed; tampered payload rejected |
+| **Tamper Resistance** | Modified payload rejected with signature mismatch | ✅ PASS | `tests/unit/test_security.py::test_verify_razorpay_signature_tampered_payload` passed |
+| **Health Check (Normal)** | `GET /health` returns 200 OK when DB connected | ✅ PASS | `tests/unit/test_health.py::test_health_check_healthy` passed |
+| **Health Check (Degraded)** | `GET /health` returns 503 Service Unavailable when DB disconnected | ✅ PASS | `tests/unit/test_health.py::test_health_check_db_failure_returns_503` passed (BUG-006 regression fix) |
+| **Quota Retry-After Header** | `QuotaExceededError` includes `Retry-After: <seconds>` HTTP header | ✅ PASS | `tests/unit/test_exceptions.py::test_quota_exceeded_header_and_body` passed (BUG-011 regression fix) |
+| **Duplicate Webhook Format** | `DuplicateWebhookError` returns `{"status": "ignored", "reason": "duplicate_webhook"}` | ✅ PASS | `tests/unit/test_exceptions.py::test_duplicate_webhook_format` passed (BUG-007 regression fix) |
+| **Partial Unique Constraint** | `UsageEvent` partial index `uq_usage_events_tenant_idempotency_key` | ✅ PASS | `tests/unit/test_models.py::test_usage_event_partial_unique_index` passed (BUG-003 regression fix) |
+| **Covering Rollup Index** | `UsageEvent` index `idx_usage_events_rollup` with `INCLUDE` clause | ✅ PASS | `tests/unit/test_models.py::test_usage_event_covering_rollup_index` passed (BUG-004 regression fix) |
+| **Database Transaction Commit** | `get_db()` executes `await session.commit()` on clean exit | ✅ PASS | `tests/unit/test_database.py::test_get_db_commits_on_success` passed (BUG-005 regression fix) |
+| **Production Credential Guard** | Rejects placeholder Razorpay credentials when `APP_ENV=production` | ✅ PASS | `tests/unit/test_config.py::test_settings_production_rejects_placeholder_credentials` passed (BUG-009 fix) |
+| **Extra Environment Variables** | `SettingsConfigDict(extra="ignore")` prevents startup crash on extra vars | ✅ PASS | `tests/unit/test_config.py::test_settings_ignores_extra_environment_variables` passed |
 
 ---
+
 
 ## Evidence Template Format
 

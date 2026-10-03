@@ -36,9 +36,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # Development volume mount for live reloading; omitted in production deployment
     volumes:
       - .:/app
     healthcheck:
+
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 15s
       timeout: 5s

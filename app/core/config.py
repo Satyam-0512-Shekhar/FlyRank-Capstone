@@ -7,6 +7,7 @@ NEVER hard-code secrets here.
 """
 
 from functools import lru_cache
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,7 +16,9 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
+
 
     # ── Application ─────────────────────────────────────────────────────
     APP_ENV: str = "development"
@@ -42,6 +45,13 @@ class Settings(BaseSettings):
     # ── Budget guard (micro-INR per call) ────────────────────────────────
     FREE_MAX_COST_PER_CALL_MICRO_INR: int = 10_000_000   # ₹10.00
     PRO_MAX_COST_PER_CALL_MICRO_INR: int = 100_000_000   # ₹100.00
+
+    @model_validator(mode="after")
+    def validate_secrets(self) -> "Settings":
+        if self.APP_ENV == "production":
+            if "placeholder" in self.RAZORPAY_KEY_SECRET or "placeholder" in self.RAZORPAY_WEBHOOK_SECRET:
+                raise ValueError("Production environment cannot use placeholder Razorpay credentials.")
+        return self
 
 
 @lru_cache

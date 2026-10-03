@@ -1,7 +1,7 @@
-"""UsageEvent model — full schema defined in Phase 3."""
+"""UsageEvent model — immutable usage ledger."""
 import uuid
 import datetime
-from sqlalchemy import String, BigInteger, Integer, ForeignKey, func
+from sqlalchemy import String, BigInteger, Integer, ForeignKey, func, Index, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
@@ -26,3 +26,22 @@ class UsageEvent(Base):
     timestamp: Mapped[datetime.datetime] = mapped_column(
         server_default=func.now(), nullable=False, index=True
     )
+
+    __table_args__ = (
+        # Defense-in-depth: prevents duplicate billing events for idempotent requests
+        Index(
+            "uq_usage_events_tenant_idempotency_key",
+            "tenant_id",
+            "idempotency_key",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+        ),
+        # Covering index for fast monthly usage rollups without table scans
+        Index(
+            "idx_usage_events_rollup",
+            "tenant_id",
+            "timestamp",
+            postgresql_include=["api_calls", "total_tokens", "cost_micro_inr"],
+        ),
+    )
+
