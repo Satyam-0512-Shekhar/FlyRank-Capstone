@@ -58,3 +58,53 @@ class SubscriptionRepository:
         if not row:
             return None, None
         return row[0], row[1]
+
+    async def get_by_provider_subscription_id(
+        self, provider_subscription_id: str
+    ) -> Subscription | None:
+        """Fetch subscription by payment provider subscription ID."""
+        stmt = select(Subscription).where(
+            Subscription.provider_subscription_id == provider_subscription_id
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def set_provider_subscription_id(
+        self,
+        subscription: Subscription,
+        provider_subscription_id: str,
+        status: str = "pending",
+    ) -> Subscription:
+        """Attach a provider subscription ID and set status."""
+        subscription.provider_subscription_id = provider_subscription_id
+        subscription.status = status
+        await self.session.flush()
+        return subscription
+
+    async def update_status(
+        self,
+        subscription: Subscription,
+        new_status: str,
+    ) -> Subscription:
+        """Update subscription status."""
+        subscription.status = new_status
+        await self.session.flush()
+        return subscription
+
+    async def upgrade_to_plan(
+        self,
+        subscription: Subscription,
+        new_plan_id: uuid.UUID,
+        new_status: str = "active",
+        period_start: datetime.datetime | None = None,
+        period_end: datetime.datetime | None = None,
+    ) -> Subscription:
+        """Upgrade subscription plan and activate."""
+        subscription.plan_id = new_plan_id
+        subscription.status = new_status
+        if period_start is not None:
+            subscription.current_period_start = period_start
+        if period_end is not None:
+            subscription.current_period_end = period_end
+        await self.session.flush()
+        return subscription
