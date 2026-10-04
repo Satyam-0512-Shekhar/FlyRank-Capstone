@@ -30,13 +30,13 @@ class RazorpayProvider(PaymentProvider):
         if mock_mode is not None:
             self.mock_mode = mock_mode
         else:
-            # Auto mock if using placeholder credentials or running in development/test
-            is_placeholder = (
-                "placeholder" in self.key_id
+            # Auto mock if not running in production or using test/placeholder credentials
+            self.mock_mode = (
+                settings.APP_ENV in ("development", "test", "testing")
+                or "placeholder" in self.key_id
                 or "placeholder" in self.key_secret
-                or settings.APP_ENV in ("development", "test")
+                or "test" in self.key_id
             )
-            self.mock_mode = is_placeholder
 
     async def create_subscription(
         self,
