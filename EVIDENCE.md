@@ -71,9 +71,10 @@ For each requirement, evidence includes:
 | Field | Value |
 |---|---|
 | Test | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade` |
+| Command | `pytest tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade -v` |
 | Expected | Webhook 200 OK processed; GET /usage shows plan=pro, api_calls.limit=50000 |
-| Actual | *Pending Phase 9-10* |
-| Output | *Pending Phase 9-10* |
+| Actual | ✅ PASSED: Valid HMAC signature webhook with event `subscription.activated` for subscription `sub_probe3_test` returned 200 OK `{"status": "processed"}`. DB subscription updated to `active` with plan `pro`. Subsequent `GET /api/v1/usage` immediately returned elevated Pro limits: `api_calls.limit = 50000` and `ai_tokens.limit = 10000000`. |
+| Output | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade PASSED` |
 
 ---
 
@@ -84,9 +85,10 @@ For each requirement, evidence includes:
 | Field | Value |
 |---|---|
 | Test | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_4_webhook_security` |
+| Command | `pytest tests/integration/test_acceptance_probes_webhooks.py::test_probe_4_webhook_security -v` |
 | Expected | Forged: 400 {"error":"invalid_signature"}; Valid: 200 processed; Replay: 200 ignored |
-| Actual | *Pending Phase 9-10* |
-| Output | *Pending Phase 9-10* |
+| Actual | ✅ PASSED: Step 4a (Forged): Invalid HMAC signature rejected with 400 Bad Request `{"error": "invalid_signature"}` and 0 DB mutations. Step 4b (Valid): Genuine HMAC processed with 200 OK `{"status": "processed"}` and subscription activated. Step 4c (Replayed): Replayed request returned 200 OK `{"status": "ignored", "reason": "duplicate_webhook"}` with exactly 1 row in `payment_events` and zero duplicate mutations. |
+| Output | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_4_webhook_security PASSED` |
 
 ---
 

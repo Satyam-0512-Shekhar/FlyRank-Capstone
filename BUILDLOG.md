@@ -109,5 +109,22 @@ Each entry follows this structure:
 | **Why Changed** | Ensure 100% thread-safety, transaction isolation, and flawless passing of Acceptance Probes 1, 2, and 5 |
 | **How Tested** | `python -m pytest --cov=app tests/` → 65/65 PASSED (91% total coverage); `pytest tests/integration/test_acceptance_probes_metering.py -v` → 3/3 PROBES PASSED |
 
+---
+
+### 2026-10-04 — Phase 9–10: Razorpay Integration & Webhook Handling
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Phases 9–10: Razorpay Integration & Webhook Handling |
+| **Task** | Abstract PaymentProvider and RazorpayProvider adapter, PaymentEventRepository with deduplication, SubscriptionService for initiating upgrades, WebhookService with constant-time HMAC-SHA256 signature verification and replay protection, Billing & Webhook API endpoints (`POST /api/v1/billing/subscription`, `GET /api/v1/billing/subscription`, `POST /api/v1/webhooks/razorpay`), and automated verification for Acceptance Probes 3 and 4 |
+| **AI Assistance** | Antigravity (Gemini Flash + Claude Sonnet Thinking) |
+| **What AI Generated** | `app/integrations/payments/base.py`, `app/integrations/payments/razorpay.py`, `app/repositories/payment_event_repository.py`, `app/schemas/billing.py`, `app/services/subscription_service.py`, `app/services/webhook_service.py`, `app/api/v1/billing.py`, `app/api/v1/webhooks.py`, unit tests (`test_payment_provider.py`, `test_payment_event_repo.py`, `test_webhook_service.py`), integration tests (`test_billing_api.py`, `test_webhooks_api.py`, `test_acceptance_probes_webhooks.py`) |
+| **What Was Correct** | Constant-time HMAC-SHA256 verification using `hmac.compare_digest()`; replay deduplication returning `{"status": "ignored", "reason": "duplicate_webhook"}` without mutating database; monotonic subscription lifecycle updates (`pending` → `active` on `subscription.activated`); immediate elevation of limits in `GET /api/v1/usage` |
+| **What Was Incorrect** | 1. Plan model attribute in `SubscriptionService` was referenced as `price_monthly_micro_inr` instead of `price_micro_inr`. Fixed to use exact column name.<br>2. `RazorpayProvider` mock check did not account for pytest `APP_ENV=testing` (with "ing"). Fixed to match any non-production or test environment.<br>3. `test_billing_api.py` defined redundant test client that did not commit transactions on exit. Fixed to use shared `client` fixture from `conftest.py`. |
+| **What Was Changed** | Added `response_model_exclude_none=True` on webhook route; wired `billing` and `webhooks` routers into `app/main.py`; updated Pro plan quota assertion to match seeded 10,000,000 tokens |
+| **Why Changed** | Complete Phases 9 & 10 milestone per approved DESIGN.md §11, §14.5, §14.6 and satisfy Acceptance Probes 3 and 4 |
+| **How Tested** | `python -m pytest --cov=app --cov=scripts tests/` → 84/84 PASSED (89% total coverage); `pytest tests/integration/test_acceptance_probes_metering.py tests/integration/test_acceptance_probes_webhooks.py -v` → 5/5 PROBES PASSED |
+
 
 
