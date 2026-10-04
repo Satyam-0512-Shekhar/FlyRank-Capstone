@@ -75,3 +75,21 @@ Each entry follows this structure:
 | **Why Changed** | Systematic resolution of all Critical/High bugs and security findings from Phase 3 Red-Team Report |
 | **How Tested** | `python -m pytest -v --cov=app tests/` → 19/19 PASSED (0 failures, 97% coverage) |
 
+---
+
+### 2026-10-04 — Phase 4: Multi-Tenant Foundation & Plan Hierarchy
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Phase 4: Multi-Tenant Foundation & Plan Hierarchy |
+| **Task** | Tenant onboarding, automatic Free tier subscription provisioning, authentication dependency, and IDOR elimination |
+| **AI Assistance** | Antigravity (Gemini Flash) |
+| **What AI Generated** | `app/schemas/tenant.py`, `app/schemas/plan.py`, `app/repositories/tenant_repository.py`, `app/repositories/subscription_repository.py`, `app/repositories/plan_repository.py`, `app/services/tenant_service.py`, `app/api/deps.py` (`get_current_tenant`), `app/api/v1/tenants.py` routes, `tests/unit/test_tenant_service.py`, `tests/integration/test_tenants_api.py`, `tests/integration/test_tenant_isolation.py` |
+| **What Was Correct** | Clean 4-tier layer decoupling; calendar-month calculation for Free subscription window; UUID format validation; 403 Forbidden on cross-tenant IDOR path tampering |
+| **What Was Incorrect** | None — all 35 tests passed on first run |
+| **What Was Changed** | Connected remote GitHub repository; registered tenants router under `/api/v1` prefix |
+| **Why Changed** | Complete Phase 4 milestone per approved DESIGN.md §13 & §14.2 |
+| **How Tested** | `python -m pytest -v --cov=app --cov=scripts tests/` → 35/35 PASSED (93% coverage) |
+
+
