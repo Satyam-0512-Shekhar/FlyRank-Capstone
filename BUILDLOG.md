@@ -92,4 +92,22 @@ Each entry follows this structure:
 | **Why Changed** | Complete Phase 4 milestone per approved DESIGN.md §13 & §14.2 |
 | **How Tested** | `python -m pytest -v --cov=app --cov=scripts tests/` → 35/35 PASSED (93% coverage) |
 
+---
+
+### 2026-10-04 — Phase 5–8: Usage Metering, Pricing, Quota & Idempotency Core
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Phases 5–8: Usage Metering, Pricing, Quota & Idempotency Core |
+| **Task** | Billable AI generation endpoint (`POST /api/v1/generate`), pure integer micro-INR token pricing engine, dual-quota pre-execution enforcement, per-call budget guards, double-checked locking idempotency, usage aggregation endpoints (`GET /api/v1/usage`, `GET /api/v1/usage/events`), and automated verification for Acceptance Probes 1, 2, and 5 |
+| **AI Assistance** | Antigravity (Gemini Flash + Claude Sonnet Thinking) |
+| **What AI Generated** | `app/services/pricing_service.py`, `app/schemas/usage.py`, `app/repositories/usage_repository.py`, `app/repositories/idempotency_repository.py`, `app/services/quota_service.py`, `app/services/meter_service.py`, `app/api/v1/generate.py`, `app/api/v1/usage.py`, unit tests (`test_pricing.py`, `test_usage_schemas.py`, `test_usage_repositories.py`, `test_quota_service.py`, `test_meter_service.py`), integration tests (`test_generate_api.py`, `test_usage_api.py`), acceptance probe tests (`test_acceptance_probes_metering.py`) |
+| **What Was Correct** | Pure integer arithmetic formula without float division; double-checked locking flow; dual-quota pre-validation and budget guard ceiling logic; honest 429 response with `Retry-After` header; X-Cache-Lookup headers (`HIT` vs `MISS`) |
+| **What Was Incorrect** | 1. `tests/conftest.py` shared a single SQLite in-memory connection across concurrent coroutines causing transaction collision. Fixed by using isolated temporary SQLite files enabling true independent connections.<br>2. `usage_event.id` was evaluated before commit causing `None` UUID string validation error. Fixed by explicitly assigning `uuid.uuid4()`.<br>3. `meter_service.py` caught concurrent duplicate races with database-level `IntegrityError` fallback, returning winner's committed response body cleanly. |
+| **What Was Changed** | Added `IntegrityError` catch-and-recover block in `MeterService`; explicitly passed `uuid.uuid4()` to `UsageEvent`; wired `generate` and `usage` routers into `app/main.py`; updated test fixtures for true connection isolation |
+| **Why Changed** | Ensure 100% thread-safety, transaction isolation, and flawless passing of Acceptance Probes 1, 2, and 5 |
+| **How Tested** | `python -m pytest --cov=app tests/` → 65/65 PASSED (91% total coverage); `pytest tests/integration/test_acceptance_probes_metering.py -v` → 3/3 PROBES PASSED |
+
+
 

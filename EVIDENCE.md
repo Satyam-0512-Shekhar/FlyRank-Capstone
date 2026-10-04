@@ -42,11 +42,11 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/probes/test_acceptance_probes.py::test_probe_1_idempotency` |
-| Command | `pytest tests/probes/test_acceptance_probes.py::test_probe_1_idempotency -v` |
-| Expected | 2 requests → 1 `usage_events` row; Call 2 returns `X-Cache-Lookup: HIT` |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Test | `tests/integration/test_acceptance_probes_metering.py::test_probe_1_idempotent_metering_sequential_and_concurrent` |
+| Command | `pytest tests/integration/test_acceptance_probes_metering.py::test_probe_1_idempotent_metering_sequential_and_concurrent -v` |
+| Expected | 2 requests → 1 `usage_events` row; Call 2 returns `X-Cache-Lookup: HIT`; Concurrent burst of 5 requests with same key yields 1 MISS, 4 HITs, and exactly 1 usage event recorded. |
+| Actual | ✅ PASSED: 1 initial MISS + 1 sequential HIT (same event ID returned, zero duplicate DB events). Burst of 5 concurrent requests with identical key yielded exactly 1 MISS and 4 HITs, with exactly 1 additional DB event. |
+| Output | `tests/integration/test_acceptance_probes_metering.py::test_probe_1_idempotent_metering_sequential_and_concurrent PASSED` |
 
 ---
 
@@ -56,10 +56,11 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/probes/test_acceptance_probes.py::test_probe_2_quota_boundary` |
-| Expected | Call #1000: 200 OK; Call #1001: 429 with `quota_dimension: api_calls` |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Test | `tests/integration/test_acceptance_probes_metering.py::test_probe_2_quota_boundary_honesty` |
+| Command | `pytest tests/integration/test_acceptance_probes_metering.py::test_probe_2_quota_boundary_honesty -v` |
+| Expected | Call at remaining quota boundary succeeds (200 OK); next call over boundary is rejected with 429, body containing `error: "quota_exceeded"`, `quota_dimension: "api_calls"`, and `Retry-After` header present. |
+| Actual | ✅ PASSED: Request using remaining quota succeeded with 200 OK. Next request returned 429 Too Many Requests with `error: "quota_exceeded"`, `quota_dimension: "api_calls"`, and valid `Retry-After` header. Post-rejection GET /usage verified no phantom usage was recorded. |
+| Output | `tests/integration/test_acceptance_probes_metering.py::test_probe_2_quota_boundary_honesty PASSED` |
 
 ---
 
@@ -69,10 +70,10 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/probes/test_acceptance_probes.py::test_probe_3_pro_upgrade` |
+| Test | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade` |
 | Expected | Webhook 200 OK processed; GET /usage shows plan=pro, api_calls.limit=50000 |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | *Pending Phase 9-10* |
+| Output | *Pending Phase 9-10* |
 
 ---
 
@@ -82,10 +83,10 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/probes/test_acceptance_probes.py::test_probe_4_webhook_security` |
+| Test | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_4_webhook_security` |
 | Expected | Forged: 400 {"error":"invalid_signature"}; Valid: 200 processed; Replay: 200 ignored |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | *Pending Phase 9-10* |
+| Output | *Pending Phase 9-10* |
 
 ---
 
@@ -95,10 +96,11 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/probes/test_acceptance_probes.py::test_probe_5_pricing` |
+| Test | `tests/integration/test_acceptance_probes_metering.py::test_probe_5_ai_token_pricing_verification` |
+| Command | `pytest tests/integration/test_acceptance_probes_metering.py::test_probe_5_ai_token_pricing_verification -v` |
 | Expected | 1000×40 + 2000×10 + 500×160 + 200×160 = 172,000 μINR |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | ✅ PASSED: Simulated request with (1000 fresh, 2000 cached, 500 output, 200 reasoning) yielded cost_micro_inr = 172,000. Verified zero floating-point rounding errors across API response, UsageEvent DB record, and GET /usage rollup. |
+| Output | `tests/integration/test_acceptance_probes_metering.py::test_probe_5_ai_token_pricing_verification PASSED` |
 
 ---
 
@@ -108,10 +110,11 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/integration/test_tenant_isolation.py` |
+| Test | `tests/integration/test_tenant_isolation.py::test_cross_tenant_access_denied_idor_protection` |
+| Command | `pytest tests/integration/test_tenant_isolation.py -v` |
 | Expected | Cross-tenant requests return 403 or 404 |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | ✅ PASSED: Cross-tenant access attempted by Tenant A against Tenant B returns 403 Forbidden with `TENANT_ACCESS_DENIED`. |
+| Output | `tests/integration/test_tenant_isolation.py::test_cross_tenant_access_denied_idor_protection PASSED` |
 
 ---
 
