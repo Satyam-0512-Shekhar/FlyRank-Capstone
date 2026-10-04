@@ -130,9 +130,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from app.api.v1 import health, tenants  # noqa: E402
+from app.api.v1 import health, tenants, generate, usage  # noqa: E402
 
 app.include_router(health.router, tags=["System"])
 app.include_router(tenants.router, prefix="/api/v1")
+app.include_router(generate.router, prefix="/api/v1")
+app.include_router(usage.router, prefix="/api/v1")
 
 
