@@ -16,11 +16,9 @@ os.environ["RAZORPAY_WEBHOOK_SECRET"] = "test_webhook_secret_xyz"
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.core.database import get_db
+from app.core.database import get_db, Base
+import app.models  # noqa: F401
 from app.main import app  # noqa: E402
-from app.models.tenant import Tenant
-from app.models.plan import Plan
-from app.models.subscription import Subscription
 from scripts.seed_data import seed_plans
 
 
@@ -31,12 +29,13 @@ def anyio_backend():
 
 @pytest_asyncio.fixture
 async def db_session():
-    """Isolated in-memory database with Tenant, Plan, and Subscription tables."""
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    """Isolated in-memory database with all application tables created and seeded."""
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+    )
     async with engine.begin() as conn:
-        await conn.run_sync(Tenant.__table__.create)
-        await conn.run_sync(Plan.__table__.create)
-        await conn.run_sync(Subscription.__table__.create)
+        await conn.run_sync(Base.metadata.create_all)
 
     session_factory = async_sessionmaker(
         bind=engine,
