@@ -125,7 +125,7 @@ docker compose exec backend pytest -v --cov=app tests/
 | `POST` | `/api/v1/generate` | Billable LLM dummy endpoint with dual-quota & idempotency | 200, 400, 409, 429 |
 | `GET` | `/api/v1/usage` | Current billing period aggregated usage and cost | 200, 401 |
 | `GET` | `/api/v1/usage/events` | Paginated raw immutable usage ledger entries | 200, 401 |
-| `POST` | `/api/v1/billing/subscription` | Create Razorpay subscription checkout session | 200, 400 |
+| `POST` | `/api/v1/billing/subscription` | Create Razorpay subscription checkout session | 201, 400 |
 | `POST` | `/api/v1/webhooks/razorpay` | Cryptographically signed Razorpay webhook receiver | 200, 400 |
 
 ---

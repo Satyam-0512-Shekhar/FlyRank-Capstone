@@ -126,10 +126,11 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/integration/test_quota.py::test_usage_rollup_accuracy` |
+| Test | `tests/integration/test_usage_api.py::test_usage_summary_and_events_api` |
+| Command | `pytest tests/integration/test_usage_api.py::test_usage_summary_and_events_api -v` |
 | Expected | Sum of all usage_events.api_calls and usage_events.total_tokens matches reported values |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | ✅ PASSED: Single generation event recorded 1 API call, 3,700 tokens (1000 fresh, 2000 cached, 500 output, 200 reasoning), and 172,000 μINR cost. Subsequent `GET /api/v1/usage` accurately verified remaining API calls (999/1000), remaining tokens (96,300/100,000), exact breakdown per category, and exact total cost. |
+| Output | `tests/integration/test_usage_api.py::test_usage_summary_and_events_api PASSED` |
 
 ---
 
@@ -139,7 +140,8 @@ For each requirement, evidence includes:
 
 | Field | Value |
 |---|---|
-| Test | `tests/integration/test_quota.py::test_budget_guard_enforcement` |
+| Test | `tests/integration/test_generate_api.py::test_generate_endpoint_budget_guard_exceeded_429` |
+| Command | `pytest tests/integration/test_generate_api.py::test_generate_endpoint_budget_guard_exceeded_429 -v` |
 | Expected | Request with projected cost > max_cost_per_call_micro_inr → 429 budget_guard_exceeded |
-| Actual | *To be recorded in Phase 13* |
-| Output | *To be recorded in Phase 13* |
+| Actual | ✅ PASSED: Free plan ceiling is ₹10.00 (10,000,000 μINR). Requesting 100,000 output tokens yields projected cost of 16,000,000 μINR (₹16.00). Request was rejected before generation with 429 Too Many Requests, error `budget_guard_exceeded`, and Retry-After header. |
+| Output | `tests/integration/test_generate_api.py::test_generate_endpoint_budget_guard_exceeded_429 PASSED` |

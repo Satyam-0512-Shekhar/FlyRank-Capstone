@@ -21,3 +21,10 @@ endpoints:
   subscription: "POST /api/v1/billing/subscription"
   webhooks: "POST /api/v1/webhooks/razorpay"
 
+probes:
+  probe_1: "pytest tests/integration/test_acceptance_probes_metering.py::test_probe_1_idempotent_metering_sequential_and_concurrent -v"
+  probe_2: "pytest tests/integration/test_acceptance_probes_metering.py::test_probe_2_quota_boundary_honesty -v"
+  probe_3: "pytest tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade -v"
+  probe_4: "pytest tests/integration/test_acceptance_probes_webhooks.py::test_probe_4_webhook_security -v"
+  probe_5: "pytest tests/integration/test_acceptance_probes_metering.py::test_probe_5_ai_token_pricing_verification -v"
+
