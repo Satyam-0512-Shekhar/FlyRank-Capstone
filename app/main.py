@@ -21,6 +21,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+from app.core.database import Base, engine, AsyncSessionLocal
+import app.models  # noqa: F401
+
+
 # ── Lifespan Context Manager ──────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +41,19 @@ async def lifespan(app: FastAPI):
         logger.warning(
             "Running with placeholder Razorpay credentials. Webhook verification will use placeholder secret."
         )
+
+    # In development or testing, ensure tables exist and canonical plans are seeded
+    if settings.APP_ENV in ("development", "testing"):
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            async with AsyncSessionLocal() as session:
+                from scripts.seed_data import seed_plans
+                await seed_plans(session)
+            logger.info("Database schema validated and canonical plans verified.")
+        except Exception as exc:
+            logger.warning("Database auto-initialization skipped or deferred: %s", exc)
+
     yield
     logger.info("FlyRank Billing Engine shutting down")
 

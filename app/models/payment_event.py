@@ -1,7 +1,7 @@
 """PaymentEvent model — full schema defined in Phase 3."""
 import uuid
 import datetime
-from sqlalchemy import String, Text, UniqueConstraint, Uuid, func
+from sqlalchemy import String, Text, UniqueConstraint, Uuid, func, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 from app.core.database import Base
@@ -19,7 +19,7 @@ class PaymentEvent(Base):
     provider_event_id: Mapped[str] = mapped_column(String(255), nullable=False)
     event_type: Mapped[str] = mapped_column(String(100), nullable=False)
     payload_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    raw_payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    raw_payload: Mapped[dict] = mapped_column(JSON().with_variant(JSONB, "postgresql"), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="processed")
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     processed_at: Mapped[datetime.datetime | None] = mapped_column(nullable=True)
