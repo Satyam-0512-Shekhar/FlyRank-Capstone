@@ -45,6 +45,7 @@ Per capstone requirements and explicit project authorization, **Razorpay Test Mo
 - **Webhook Security**: Raw payload HMAC-SHA256 verification using `X-Razorpay-Signature` with constant-time comparison (`hmac.compare_digest`), preventing timing attacks.
 - **Event Deduplication**: Deduplicated via `x-razorpay-event-id` stored in `payment_events` with unique constraint.
 - **State Machine**: Monotonic state transitions preventing out-of-order webhook delivery from resurrecting cancelled subscriptions.
+- **Simulation Mode**: Local/mock provider simulation is used for offline evaluation, test suites, and acceptance probes with cryptographic HMAC-SHA256 verification; live Razorpay gateway network execution is neither claimed nor required.
 
 ---
 
