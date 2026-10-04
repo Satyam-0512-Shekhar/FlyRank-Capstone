@@ -7,6 +7,7 @@ import datetime
 import hashlib
 import uuid
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
@@ -125,7 +126,9 @@ class MeterService:
 
         # ── Atomic Ledger Mutation: UsageEvent + IdempotencyRecord ───────────
         now = datetime.datetime.now(datetime.timezone.utc)
+        event_id = uuid.uuid4()
         usage_event = UsageEvent(
+            id=event_id,
             tenant_id=tenant_id,
             usage_type="generate",
             api_calls=1,
@@ -138,14 +141,13 @@ class MeterService:
             idempotency_key=idempotency_key,
             timestamp=now,
         )
-        await UsageRepository.create(session, usage_event)
 
         formatted_cost = PricingService.format_micro_inr(projected_cost)
         response_body = {
             "id": gen_id,
             "result": result_text,
             "metering": {
-                "usage_event_id": str(usage_event.id),
+                "usage_event_id": str(event_id),
                 "api_calls_metered": 1,
                 "total_tokens_metered": total_tokens,
                 "cost_micro_inr": projected_cost,
@@ -161,7 +163,21 @@ class MeterService:
             response_status_code=200,
             response_body=response_body,
         )
-        await IdempotencyRepository.create(session, idempotency_record)
-        await session.flush()
 
-        return response_body, False
+        try:
+            await UsageRepository.create(session, usage_event)
+            await IdempotencyRepository.create(session, idempotency_record)
+            await session.commit()
+            return response_body, False
+        except IntegrityError:
+            await session.rollback()
+            # A concurrent transaction with identical key won the race and committed.
+            # Re-fetch the committed winner record:
+            winner = await IdempotencyRepository.get(session, tenant_id, idempotency_key)
+            if winner:
+                if winner.request_hash != request_hash:
+                    raise IdempotencyConflictError(
+                        "Idempotency-Key was already used with a different request payload."
+                    )
+                return winner.response_body, True
+            raise
