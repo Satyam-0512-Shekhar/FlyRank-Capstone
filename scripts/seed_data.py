@@ -6,8 +6,15 @@ Idempotent: safe to run multiple times.
 
 import asyncio
 import logging
+import pathlib
+import sys
 import uuid
 from typing import Sequence
+
+# Ensure project root is in sys.path when executed directly
+project_root = str(pathlib.Path(__file__).resolve().parent.parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
