@@ -126,5 +126,22 @@ Each entry follows this structure:
 | **Why Changed** | Complete Phases 9 & 10 milestone per approved DESIGN.md §11, §14.5, §14.6 and satisfy Acceptance Probes 3 and 4 |
 | **How Tested** | `python -m pytest --cov=app --cov=scripts tests/` → 84/84 PASSED (89% total coverage); `pytest tests/integration/test_acceptance_probes_metering.py tests/integration/test_acceptance_probes_webhooks.py -v` → 5/5 PROBES PASSED |
 
+---
+
+### 2026-10-04 — Phase 11: Resilient Background Subscription Reconciliation Worker
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Phase 11: Resilient Background Subscription Reconciliation Worker |
+| **Task** | Standalone async background worker utility with exponential backoff (1s, 2s, 4s), concurrency-safe row locking (`SELECT ... FOR UPDATE SKIP LOCKED` on PostgreSQL), structured failure alerting, periodic sweep loop, and unit test suite |
+| **AI Assistance** | Antigravity (Gemini Flash + Claude Sonnet Thinking) |
+| **What AI Generated** | `app/workers/reconciliation.py`, `app/workers/__init__.py`, `tests/unit/test_reconciliation_worker.py` |
+| **What Was Correct** | Dialect-safe SQL locking checking `dialect.name == "postgresql"`; exponential retry backoff loop; structured error alerting with `extra={"alert": True, ...}` on persistent gateway failure; atomic batch commit on sweep completion |
+| **What Was Incorrect** | Pytest `caplog` did not capture log records when preceding tests had reconfigured root logger handlers. Fixed by using `unittest.mock.patch` directly on `logger.error` for deterministic assertion. |
+| **What Was Changed** | Patched logger in failure test; exported `ReconciliationWorker` in `app/workers/__init__.py` |
+| **Why Changed** | Satisfy FlyRank Shared Requirement #3 without bloated infrastructure (no Celery, Redis, or Kafka) per approved DESIGN.md §12 |
+| **How Tested** | `python -m pytest --cov=app --cov=scripts tests/` → 87/87 PASSED (87% total coverage) |
+
 
 
