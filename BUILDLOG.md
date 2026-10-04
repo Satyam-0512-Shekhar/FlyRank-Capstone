@@ -143,5 +143,22 @@ Each entry follows this structure:
 | **Why Changed** | Satisfy FlyRank Shared Requirement #3 without bloated infrastructure (no Celery, Redis, or Kafka) per approved DESIGN.md §12 |
 | **How Tested** | `python -m pytest --cov=app --cov=scripts tests/` → 87/87 PASSED (87% total coverage) |
 
+---
+
+### 2026-10-04 — Final Audit Remediation: Pro Plan Quota Alignment
+
+| Field | Value |
+|---|---|
+| **Date** | 2026-10-04 |
+| **Phase** | Final Audit Remediation: Pro Plan Quota Alignment |
+| **Task** | Reconcile Pro plan AI-token quota across all project files to match the canonical value of 5,000,000 tokens/month defined in approved DESIGN.md §2 & §3.2 |
+| **AI Assistance** | Antigravity (Claude Sonnet Thinking) |
+| **What AI Generated** | Updated `scripts/seed_data.py`, `tests/unit/test_seed.py`, `tests/integration/test_acceptance_probes_webhooks.py`, `EVIDENCE.md`, `README.md`, `BUILDLOG.md` |
+| **What Was Correct** | Clean synchronization across seed data, test assertions, and documentation |
+| **What Was Incorrect** | Pro plan token quota was previously seeded as 10,000,000 instead of 5,000,000 |
+| **What Was Changed** | Set `token_quota = 5_000_000` in `scripts/seed_data.py`; updated test assertions and probe verification tables |
+| **Why Changed** | 100% adherence to approved DESIGN.md specification per user audit instruction |
+| **How Tested** | `python -m pytest --cov=app --cov=scripts tests/` → 87/87 PASSED (87% total coverage) |
+
 
 

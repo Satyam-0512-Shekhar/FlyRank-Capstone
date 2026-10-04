@@ -37,7 +37,7 @@ CANONICAL_PLANS = [
         "id": PRO_PLAN_ID,
         "name": "pro",
         "api_call_quota": 50_000,
-        "token_quota": 10_000_000,
+        "token_quota": 5_000_000,
         "max_cost_per_call_micro_inr": 100_000_000,  # ₹100.00
         "price_micro_inr": 1_999_000_000,  # ₹1,999.00
         "currency": "INR",

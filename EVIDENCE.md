@@ -73,7 +73,7 @@ For each requirement, evidence includes:
 | Test | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade` |
 | Command | `pytest tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade -v` |
 | Expected | Webhook 200 OK processed; GET /usage shows plan=pro, api_calls.limit=50000 |
-| Actual | ✅ PASSED: Valid HMAC signature webhook with event `subscription.activated` for subscription `sub_probe3_test` returned 200 OK `{"status": "processed"}`. DB subscription updated to `active` with plan `pro`. Subsequent `GET /api/v1/usage` immediately returned elevated Pro limits: `api_calls.limit = 50000` and `ai_tokens.limit = 10000000`. |
+| Actual | ✅ PASSED: Valid HMAC signature webhook with event `subscription.activated` for subscription `sub_probe3_test` returned 200 OK `{"status": "processed"}`. DB subscription updated to `active` with plan `pro`. Subsequent `GET /api/v1/usage` immediately returned elevated Pro limits: `api_calls.limit = 50000` and `ai_tokens.limit = 5000000`. |
 | Output | `tests/integration/test_acceptance_probes_webhooks.py::test_probe_3_pro_upgrade PASSED` |
 
 ---

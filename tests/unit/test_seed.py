@@ -55,7 +55,7 @@ async def test_seed_plans_creates_canonical_plans(plan_db_session):
     pro = stored_plans["pro"]
     assert pro.id == PRO_PLAN_ID
     assert pro.api_call_quota == 50_000
-    assert pro.token_quota == 10_000_000
+    assert pro.token_quota == 5_000_000
     assert pro.max_cost_per_call_micro_inr == 100_000_000  # ₹100.00 ceiling
     assert pro.price_micro_inr == 1_999_000_000  # ₹1,999.00
     assert pro.currency == "INR"

@@ -64,6 +64,10 @@ Every billable call (`POST /api/v1/generate`) consumes **both**:
 - Exactly **1 API call**
 - Requested **AI tokens** (fresh + cached + output + reasoning)
 
+**Plan Quota Boundaries:**
+- **Free Tier**: 1,000 API calls/month, 100,000 AI tokens/month, ₹10.00 per-call budget guard, ₹0/month.
+- **Pro Tier**: 50,000 API calls/month, 5,000,000 AI tokens/month, ₹100.00 per-call budget guard, ₹1,999/month.
+
 Both quotas are evaluated atomically inside a pessimistic transaction lock (`SELECT ... FOR UPDATE` on `subscriptions`). If either quota dimension is exceeded, the request is rejected with `429 Too Many Requests` and a standard `Retry-After` header.
 
 ### 3. Idempotency with Double-Checked Locking

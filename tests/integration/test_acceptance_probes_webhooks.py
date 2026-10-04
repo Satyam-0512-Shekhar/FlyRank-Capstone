@@ -106,7 +106,7 @@ async def test_probe_3_pro_upgrade(client: AsyncClient, test_session_factory):
 
     assert usage_data["plan"] == "pro"
     assert usage_data["api_calls"]["limit"] == 50000
-    assert usage_data["ai_tokens"]["limit"] == 10000000
+    assert usage_data["ai_tokens"]["limit"] == 5000000
 
 
 @pytest.mark.asyncio
